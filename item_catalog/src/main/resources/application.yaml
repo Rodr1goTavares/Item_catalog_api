@@ -1,0 +1,15 @@
+spring:
+  #PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5433/item_catalog
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+  #Flyway
+  flyway:
+    locations: classpath:db/migration
+
+  security:
+    jwt:
+      secret: ${JWT_SECRET:luangameplay}
