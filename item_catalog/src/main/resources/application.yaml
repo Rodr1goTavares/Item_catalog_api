@@ -12,4 +12,4 @@ spring:
 
   security:
     jwt:
-      secret: ${JWT_SECRET:luangameplay}
+      secret: ${JWT_SECRET:my_secret}
