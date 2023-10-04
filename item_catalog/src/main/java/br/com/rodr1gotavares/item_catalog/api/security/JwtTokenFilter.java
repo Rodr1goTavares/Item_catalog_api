@@ -10,18 +10,19 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
 @Component
-public class JwtSecurityFilter extends OncePerRequestFilter {
+public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtTokenService tokenService;
 
     private final UserService userService;
 
-    public JwtSecurityFilter(JwtTokenService tokenService, UserService userService) {
+    public JwtTokenFilter(JwtTokenService tokenService, UserService userService) {
         this.tokenService = tokenService;
         this.userService = userService;
     }
@@ -29,18 +30,14 @@ public class JwtSecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        var token = this.recoverToken(request);
-        if (token != null) {
-            var username = tokenService.verifyToken(token);
-            UserDetails user = userService.loadUserByUsername(username);
+        String tokenHeader = request.getHeader("Authorization");
+        if (tokenHeader != null) {
+            String token = tokenHeader.replace("Bearer ", "");
+            String subject = this.tokenService.verifyToken(token);
+            UserDetails user = this.userService.loadUserByUsername(subject);
             var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         filterChain.doFilter(request, response);
-    }
-
-    private String recoverToken(HttpServletRequest httpServletRequest) {
-        var tokenHeader = httpServletRequest.getHeader("Authorization");
-        return (tokenHeader == null) ? null : tokenHeader.replace("Bearer ", "");
     }
 }

@@ -2,6 +2,7 @@ package br.com.rodr1gotavares.item_catalog.api.controller.authentication;
 
 import br.com.rodr1gotavares.item_catalog.api.dto.LoginDTO;
 import br.com.rodr1gotavares.item_catalog.api.dto.RegisterDTO;
+import br.com.rodr1gotavares.item_catalog.api.security.JwtTokenService;
 import br.com.rodr1gotavares.item_catalog.entity.user.User;
 import br.com.rodr1gotavares.item_catalog.repository.UserRepository;
 import jakarta.validation.Valid;
@@ -9,31 +10,53 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+import java.util.HashMap;
+import java.util.Map;
+
+
+@Controller
 @RequestMapping("/auth")
 public class AuthenticationController {
+
+    private final UserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, UserRepository userRepository) {
+    public AuthenticationController(
+            UserDetailsService userDetailsService,
+            AuthenticationManager authenticationManager,
+            PasswordEncoder passwordEncoder,
+            JwtTokenService jwtTokenService,
+            UserRepository userRepository) {
+        this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtTokenService = jwtTokenService;
         this.userRepository = userRepository;
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginDTO loginData) {
-        UsernamePasswordAuthenticationToken usernamePassword = new UsernamePasswordAuthenticationToken(
-                loginData.username(),
-                loginData.password()
+        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+          loginData.username(),
+          loginData.password()
         );
-        Authentication auth = this.authenticationManager.authenticate(usernamePassword);
-        return ResponseEntity.ok().build();
+        Authentication authentication = this.authenticationManager.authenticate(usernamePasswordAuthenticationToken);
+        var user = (User) authentication.getPrincipal();
+        String token = jwtTokenService.generateToken(user);
+        Map<String, String> tokenObject = new HashMap<>();
+        tokenObject.put("Token: ", token);
+        return ResponseEntity.ok(tokenObject);
     }
 
     @PostMapping("/register")
