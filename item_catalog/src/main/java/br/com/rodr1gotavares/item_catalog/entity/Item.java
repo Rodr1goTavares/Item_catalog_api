@@ -18,7 +18,7 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String OwnerName;
+    private String ownerName;
     private String name;
     private BigDecimal unitValue;
     private int amount;

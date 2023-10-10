@@ -23,9 +23,10 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    @GetMapping
-    ResponseEntity<List<ItemDTO>> get() {
-        return ResponseEntity.ok().body(itemService.read());
+    @GetMapping()
+    ResponseEntity<List<ItemDTO>> get(Authentication authentication) {
+        UserDetails owner = (UserDetails) authentication.getPrincipal();
+        return ResponseEntity.ok().body(itemService.readByOwnerName(owner.getUsername()));
     }
 
     @GetMapping("/page/{page}")
@@ -34,12 +35,13 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ItemDTO> getById(@PathVariable Long id) {
+    public ResponseEntity<ItemDTO> getById(@PathVariable Long id, Authentication authentication) {
+        UserDetails owner = (UserDetails) authentication.getPrincipal();
         Optional<ItemDTO> searchedItem = itemService.readById(id);
-        return searchedItem.map(
-                itemDTO -> ResponseEntity.ok().body(itemDTO)).orElseGet(
-                        () -> ResponseEntity.notFound().build()
-        );
+        if (searchedItem.isEmpty() || !Objects.equals(searchedItem.get().getOwnerName(), owner.getUsername())) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok().body(searchedItem.get());
     }
 
     @PostMapping

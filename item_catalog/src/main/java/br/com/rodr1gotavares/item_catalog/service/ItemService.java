@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 public class ItemService {
     private final ItemRepository itemRepository;
 
-    public ItemService(ItemRepository itemrepository) {
-        this.itemRepository = itemrepository;
+    public ItemService(ItemRepository itemRepository) {
+        this.itemRepository = itemRepository;
     }
 
     private List<ItemDTO> toDTOList(List<Item> itemList) {
@@ -44,6 +44,10 @@ public class ItemService {
         Page<Item> itemPage = this.itemRepository.findAll(PageRequest.of(page, size));
         List<Item> itemList = itemPage.stream().toList();
         return toDTOList(itemList);
+    }
+
+    public List<ItemDTO> readByOwnerName(String ownerName) {
+        return toDTOList(this.itemRepository.findByOwnerName(ownerName));
     }
 
     public Optional<ItemDTO> readById(Long id) {
