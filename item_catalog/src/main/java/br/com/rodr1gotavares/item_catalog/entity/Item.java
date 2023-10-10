@@ -11,15 +11,14 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-
-@Data
 @Entity
-@NoArgsConstructor
+@Data
+@AllArgsConstructor
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long userId;
+    private String OwnerName;
     private String name;
     private BigDecimal unitValue;
     private int amount;
@@ -27,7 +26,13 @@ public class Item {
     private LocalDate createdAt;
     private LocalDate updatedAt;
 
+    public Item() {
+        this.createdAt = LocalDate.now();
+        this.updatedAt = LocalDate.now();
+    }
+
     public Item(String name, BigDecimal unitValue, int amount) {
+        this();
         this.name = name;
         this.unitValue = unitValue;
         this.amount = amount;

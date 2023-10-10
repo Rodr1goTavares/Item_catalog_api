@@ -1,4 +1,4 @@
-package br.com.rodr1gotavares.item_catalog.api.dto;
+package br.com.rodr1gotavares.item_catalog.api.dto.auth;
 
 import br.com.rodr1gotavares.item_catalog.entity.user.UserRole;
 

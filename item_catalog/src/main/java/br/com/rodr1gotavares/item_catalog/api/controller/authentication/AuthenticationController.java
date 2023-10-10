@@ -1,7 +1,7 @@
 package br.com.rodr1gotavares.item_catalog.api.controller.authentication;
 
-import br.com.rodr1gotavares.item_catalog.api.dto.LoginDTO;
-import br.com.rodr1gotavares.item_catalog.api.dto.RegisterDTO;
+import br.com.rodr1gotavares.item_catalog.api.dto.auth.LoginDTO;
+import br.com.rodr1gotavares.item_catalog.api.dto.auth.RegisterDTO;
 import br.com.rodr1gotavares.item_catalog.api.security.JwtTokenService;
 import br.com.rodr1gotavares.item_catalog.entity.user.User;
 import br.com.rodr1gotavares.item_catalog.repository.UserRepository;
@@ -26,21 +26,14 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthenticationController {
 
-    private final UserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
-    private final PasswordEncoder passwordEncoder;
     private final JwtTokenService jwtTokenService;
     private final UserRepository userRepository;
 
     public AuthenticationController(
-            UserDetailsService userDetailsService,
-            AuthenticationManager authenticationManager,
-            PasswordEncoder passwordEncoder,
-            JwtTokenService jwtTokenService,
+            AuthenticationManager authenticationManager, JwtTokenService jwtTokenService,
             UserRepository userRepository) {
-        this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
-        this.passwordEncoder = passwordEncoder;
         this.jwtTokenService = jwtTokenService;
         this.userRepository = userRepository;
     }
@@ -52,7 +45,7 @@ public class AuthenticationController {
           loginData.password()
         );
         Authentication authentication = this.authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-        var user = (User) authentication.getPrincipal();
+        User user = (User) authentication.getPrincipal();
         String token = jwtTokenService.generateToken(user);
         Map<String, String> tokenObject = new HashMap<>();
         tokenObject.put("Token: ", token);
