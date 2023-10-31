@@ -1,5 +1,5 @@
 package br.com.rodr1gotavares.item_catalog.api.dto.auth;
 
-import br.com.rodr1gotavares.item_catalog.entity.user.UserRole;
+import jakarta.validation.constraints.NotNull;
 
-public record RegisterDTO(String username, String password, UserRole userRole) {}
+public record RegisterDTO(@NotNull String username, @NotNull String password) {}

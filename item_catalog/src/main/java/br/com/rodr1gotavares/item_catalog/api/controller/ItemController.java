@@ -5,7 +5,6 @@ import br.com.rodr1gotavares.item_catalog.entity.Item;
 import br.com.rodr1gotavares.item_catalog.service.ItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +23,7 @@ public class ItemController {
     }
 
     @GetMapping()
-    ResponseEntity<List<ItemDTO>> get(Authentication authentication) {
+    public ResponseEntity<List<ItemDTO>> get(Authentication authentication) {
         UserDetails owner = (UserDetails) authentication.getPrincipal();
         return ResponseEntity.ok().body(itemService.readByOwnerName(owner.getUsername()));
     }
