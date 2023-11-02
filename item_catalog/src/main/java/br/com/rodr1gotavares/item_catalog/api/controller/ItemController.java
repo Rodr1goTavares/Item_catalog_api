@@ -1,6 +1,7 @@
 package br.com.rodr1gotavares.item_catalog.api.controller;
 
-import br.com.rodr1gotavares.item_catalog.api.dto.ItemDTO;
+import br.com.rodr1gotavares.item_catalog.api.dto.item.ItemRequestDTO;
+import br.com.rodr1gotavares.item_catalog.api.dto.item.ItemResponseDTO;
 import br.com.rodr1gotavares.item_catalog.entity.Item;
 import br.com.rodr1gotavares.item_catalog.service.ItemService;
 import org.springframework.http.ResponseEntity;
@@ -23,28 +24,28 @@ public class ItemController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<ItemDTO>> get(Authentication authentication) {
+    public ResponseEntity<List<ItemResponseDTO>> get(Authentication authentication) {
         UserDetails owner = (UserDetails) authentication.getPrincipal();
         return ResponseEntity.ok().body(itemService.readByOwnerName(owner.getUsername()));
     }
 
     @GetMapping("/page/{page}")
-    public ResponseEntity<List<ItemDTO>> getWithPagination(@PathVariable int page) {
+    public ResponseEntity<List<ItemResponseDTO>> getWithPagination(@PathVariable int page) {
         return ResponseEntity.ok().body(this.itemService.readWithPagination(page, 10));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ItemDTO> getById(@PathVariable Long id, Authentication authentication) {
+    public ResponseEntity<ItemResponseDTO> getById(@PathVariable Long id, Authentication authentication) {
         UserDetails owner = (UserDetails) authentication.getPrincipal();
-        Optional<ItemDTO> searchedItem = itemService.readById(id);
-        if (searchedItem.isEmpty() || !Objects.equals(searchedItem.get().getOwnerName(), owner.getUsername())) {
+        Optional<ItemResponseDTO> searchedItem = itemService.readById(id);
+        if (searchedItem.isEmpty() || !Objects.equals(searchedItem.get().ownerName(), owner.getUsername())) {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok().body(searchedItem.get());
     }
 
     @PostMapping
-    public ResponseEntity<String> post(@RequestBody ItemDTO itemDTO, Authentication authentication) {
+    public ResponseEntity<String> post(@RequestBody ItemRequestDTO itemDTO, Authentication authentication) {
         UserDetails authenticatedUser = (UserDetails) authentication.getPrincipal();
         Item recivedItem = itemDTO.toItemObject();
         recivedItem.setOwnerName(authenticatedUser.getUsername());
@@ -53,8 +54,12 @@ public class ItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ItemDTO> put(@PathVariable Long id, @RequestBody ItemDTO itemDTO) {
-        if (this.itemService.readById(id).isEmpty() || !Objects.equals(id, itemDTO.getId())) return ResponseEntity.notFound().build();
+    public ResponseEntity<ItemResponseDTO> put(@PathVariable Long id, @RequestBody ItemRequestDTO itemDTO, Authentication auth) {
+        UserDetails authenticatedUser = (UserDetails) auth.getPrincipal();
+        boolean isValidUpdate = this.itemService.readById(id).isEmpty() || !Objects.equals(
+                this.itemService.readById(id).get().ownerName(), authenticatedUser.getUsername()
+        );
+        if (!isValidUpdate) return ResponseEntity.notFound().build();
         this.itemService.update(itemDTO.toItemObject());
         return ResponseEntity.ok().body(this.itemService.readById(id).get());
     }
