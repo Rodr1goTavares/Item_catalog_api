@@ -1,6 +1,6 @@
 package br.com.rodr1gotavares.item_catalog;
 
-import br.com.rodr1gotavares.item_catalog.api.dto.ItemDTO;
+import br.com.rodr1gotavares.item_catalog.api.dto.item.ItemResponseDTO;
 import br.com.rodr1gotavares.item_catalog.entity.Item;
 import br.com.rodr1gotavares.item_catalog.service.ItemService;
 import org.junit.jupiter.api.DisplayName;
@@ -23,7 +23,7 @@ class ItemCatalogApplicationTests {
 
 	@Test
 	void contextLoads() {
-
+		createAndReadItemSuccessCase();
 	}
 
 	@Test
@@ -45,8 +45,8 @@ class ItemCatalogApplicationTests {
 				10
 		);
 		this.itemService.create(testItem);
-		ItemDTO result = this.itemService.readById(1L).get();
-		assertEquals(new ItemDTO(expectedItem), result);
+		ItemResponseDTO result = this.itemService.readById(1L).get();
+		assertEquals(new ItemResponseDTO(expectedItem), result);
 	}
 }
 
